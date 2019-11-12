@@ -8,7 +8,7 @@ var request = require("request");
 var fs = require("fs");
 
 var userInput = process.argv[2];
-var userQuery = process.argv[3].replace("-", "");
+var userQuery = process.argv[3];
 
 var moment = require("moment");
 
@@ -23,9 +23,13 @@ function userCommand(userInput, userQuery) {
     case "movie-this":
       movieThis();
       break;
-    case "do-this":
-      doThis(userQuery);
+    case "do-what-it-says":
+      doWhatItSays();
       break;
+    default:
+      console.log(
+        "Command not recognized. Use 'concert-this', 'spotify-this', 'movie-this', or 'do-what-it-says'"
+      );
   }
 }
 userCommand(userInput, userQuery);
@@ -56,4 +60,34 @@ function concertThis() {
       }
     }
   );
+}
+
+function spotifyThisSong() {
+  spotify.search({ type: "track", query: userQuery }, function(error, data) {
+    if (error) {
+      return console.log("Error occurred: " + error);
+    }
+    var artist = data.tracks.items[0].artists[0].name;
+    var song = data.tracks.items[0].name;
+    var album = data.tracks.items[0].album.name;
+    var spotifyLink = data.tracks.items[0].external_urls.spotify;
+    console.log(
+      `Artist: ${artist}\nSong's name: ${song}\nAlbum: ${album}\nSpotify link: ${spotifyLink}`
+    );
+  });
+}
+
+function doWhatItSays() {
+  fs.readFile("random.txt", "utf8", function(error, data) {
+    if (error) {
+      return console.log(error);
+    }
+
+    var dataArr = data.split(",");
+
+    userInput = dataArr[0];
+    userQuery = dataArr[1];
+
+    userCommand(userInput, userQuery);
+  });
 }
